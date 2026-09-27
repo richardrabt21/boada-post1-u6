@@ -75,3 +75,54 @@ mvnw.cmd spring-boot:run
 ## Herramientas utilizadas
 - Java 17, Spring Boot, Spring JDBC, Maven, H2 Database
 - VS Code, Git, GitHub
+
+### Parte 2 - Crecimiento del proyecto (3 campanas de descuento)
+
+Antipatron identificado: Golden Hammer.
+
+Las tres campanas de descuento nuevas (Black Friday, Corporativo, Volumen)
+se implementaron como eslabones adicionales de la cadena de validacion
+existente (PromocionBlackFriday, PromocionCorporativo, PromocionVolumen,
+encadenados en GestorPedidos junto a ValidadorStock y ValidadorCliente),
+en lugar de evaluar si el problema seguia teniendo la forma de una cadena.
+
+Evidencia:
+
+- Ninguna de las tres clases nuevas depende de un orden de ejecucion entre
+  si ni frente a ValidadorStock/ValidadorCliente: pueden encadenarse en
+  cualquier orden y el resultado es identico, porque cada una solo lee el
+  request o consulta la BD y escribe en el campo compartido
+  descuentoCampana, sin leer nada que haya escrito la anterior. Esto
+  contrasta con ValidadorStock y ValidadorCliente, que si tienen una
+  dependencia real de orden y de corte anticipado (si el stock falla, no
+  tiene sentido validar la mora del cliente).
+- Ninguna de las tres clases nuevas llama nunca a contexto.rechazar(...),
+  a pesar de heredar de una clase llamada ValidadorPedido cuyo contrato es
+  "decidir si el pedido continua o se rechaza". Usan la infraestructura de
+  la cadena (el encadenamiento) sin usar lo que la hace valiosa: la
+  capacidad de cortar el flujo.
+- El campo descuentoCampana solo puede quedarse con el mayor valor escrito
+  (aplicarDescuentoCampana usa Math.max implicito). Si dos campanas
+  necesitaran combinarse (por ejemplo, sumarse) en vez de competir, la
+  cadena no ofrece ningun mecanismo para expresarlo sin reescribir ese
+  metodo.
+- Las tres campanas tienen exactamente la misma forma que DescuentoVip o
+  DescuentoFrecuente de la Parte 1: calculan un porcentaje a partir de
+  datos del pedido o del cliente, sin depender de un orden de evaluacion.
+  Se reutilizo Chain of Responsibility unicamente porque "ya funciono" en
+  la Parte 1 para las validaciones, sin evaluar si el nuevo problema tenia
+  esa misma forma.
+
+Patron aplicado: Strategy. Las tres campanas se migran a EstrategiaDescuento
+(DescuentoBlackFriday, DescuentoCorporativo, DescuentoVolumen) y se combinan
+con el descuento por tipo de cliente en un CalculadorDescuentoFinal, que
+toma el mayor entre ambos. PromocionBlackFriday, PromocionCorporativo,
+PromocionVolumen y el campo descuentoCampana se eliminan del codigo (no se
+comentan, para no dejar un Lava Flow).
+
+Alternativa descartada: mantener las tres campanas como eslabones de la
+cadena, ajustando ContextoPedido para soportar combinaciones distintas al
+maximo. Se descarto porque es precisamente la causa del antipatron
+diagnosticado: seguir forzando una herramienta que no corresponde a la
+forma del problema, en vez de reconocer que el calculo de descuento ya
+tiene su propio mecanismo de extension (Strategy) desde la Parte 1.

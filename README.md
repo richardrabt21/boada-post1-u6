@@ -126,3 +126,37 @@ maximo. Se descarto porque es precisamente la causa del antipatron
 diagnosticado: seguir forzando una herramienta que no corresponde a la
 forma del problema, en vez de reconocer que el calculo de descuento ya
 tiene su propio mecanismo de extension (Strategy) desde la Parte 1.
+
+### Comparacion antes/despues - Parte 2
+
+Los 8 casos de prueba (incluidas las 3 campanas) producen exactamente el
+mismo total con CalculadorDescuentoFinal que con los 3 eslabones de Golden
+Hammer eliminados:
+
+| Caso | Descripcion | Total |
+|---|---|---|
+| 6 | Black Friday activa | $535.500 |
+| 7 | Cliente corporativo (NIT) | $223.125 |
+| 8 | Descuento por volumen (>20 unidades) | $4.685.625 |
+
+PromocionBlackFriday, PromocionCorporativo, PromocionVolumen y el campo
+descuentoCampana ya no existen en el codigo (se eliminaron, no se
+comentaron). ValidadorPedido conserva unicamente ValidadorStock y
+ValidadorCliente como eslabones, que son los dos que si tienen dependencia
+de orden y necesidad de corte anticipado.
+
+## Conclusiones
+
+Este laboratorio mostro que no todo problema que "se parece" a uno ya
+resuelto tiene la misma forma: God Object y Spaghetti Code se originaron
+por concentrar responsabilidades sin razon de cambio compartida, y se
+corrigieron separando esas responsabilidades en Chain of Responsibility
+(para lo que si dependia de un orden) y Strategy (para lo que no). El
+antipatron de la Parte 2, Golden Hammer, no fue un problema de complejidad
+sino de evaluacion: la cadena de responsabilidad funciono bien para las
+validaciones porque tenian dependencia de orden y corte anticipado, pero
+las campanas de descuento no compartian esa propiedad, y aun asi se
+modelaron igual solo porque el patron "ya estaba ahi y funciono". La
+leccion practica es que un patron de diseno no se elige por precedente,
+sino por si la forma del nuevo problema coincide con la del que el patron
+resuelve.

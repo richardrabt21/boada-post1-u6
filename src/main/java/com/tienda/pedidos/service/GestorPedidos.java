@@ -8,6 +8,9 @@ import com.tienda.pedidos.validacion.ContextoPedido;
 import com.tienda.pedidos.validacion.ValidadorCliente;
 import com.tienda.pedidos.validacion.ValidadorPedido;
 import com.tienda.pedidos.validacion.ValidadorStock;
+import com.tienda.pedidos.validacion.PromocionBlackFriday;
+import com.tienda.pedidos.validacion.PromocionCorporativo;
+import com.tienda.pedidos.validacion.PromocionVolumen;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -22,10 +25,12 @@ public class GestorPedidos {
     private final JdbcTemplate jdbcTemplate;
 
     public GestorPedidos(ValidadorStock stock, ValidadorCliente cliente,
+                          PromocionBlackFriday blackFriday, PromocionCorporativo corporativo,
+                          PromocionVolumen volumen,
                           SelectorEstrategiaDescuento selector, PedidoRepository repository,
                           NotificacionPedidoService notificacion, JdbcTemplate jdbcTemplate) {
         this.primerValidador = stock;
-        stock.encadenar(cliente);
+        stock.encadenar(cliente).encadenar(blackFriday).encadenar(corporativo).encadenar(volumen);
         this.selector = selector;
         this.repository = repository;
         this.notificacion = notificacion;
@@ -46,7 +51,8 @@ public class GestorPedidos {
         double subtotal = calcularSubtotal(request);
         contexto.setSubtotal(subtotal);
 
-        double descuento = selector.seleccionar(contexto.getTipoCliente()).calcular(contexto);
+        double descuentoTipoCliente = selector.seleccionar(contexto.getTipoCliente()).calcular(contexto);
+        double descuento = Math.max(descuentoTipoCliente, contexto.getDescuentoCampana());
         double impuesto = (subtotal - subtotal * descuento) * 0.19;
         double total = subtotal - (subtotal * descuento) + impuesto;
 

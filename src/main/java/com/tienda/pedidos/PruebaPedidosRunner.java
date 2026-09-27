@@ -30,6 +30,15 @@ public class PruebaPedidosRunner {
 
             System.out.println("\n===== CASO 5: Cliente frecuente (mas de 3 pedidos previos) =====");
             imprimir(gestorPedidos.procesarPedido(pedido(20L, "frecuente@correo.com", item(1L, 1))));
+
+            System.out.println("\n===== CASO 6: Campana Black Friday activa (cliente sin otro descuento) =====");
+            imprimir(gestorPedidos.procesarPedido(pedido(30L, "moroso@correo.com", item(3L, 1))));
+
+            System.out.println("\n===== CASO 7: Cliente corporativo (tiene NIT registrado) =====");
+            imprimir(gestorPedidos.procesarPedido(pedido(10L, "vip@correo.com", item(1L, 1))));
+
+            System.out.println("\n===== CASO 8: Descuento por volumen (mas de 20 unidades) =====");
+            imprimir(gestorPedidos.procesarPedido(pedido(20L, "frecuente@correo.com", item(1L, 21))));
         };
     }
 

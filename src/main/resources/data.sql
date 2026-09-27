@@ -4,12 +4,12 @@ INSERT INTO productos (id, nombre, precio) VALUES (2, 'Mouse inalambrico', 80000
 INSERT INTO productos (id, nombre, precio) VALUES (3, 'Monitor 24 pulgadas', 600000);
 
 -- Inventario (stock disponible)
-INSERT INTO inventario (producto_id, stock) VALUES (1, 10);
+INSERT INTO inventario (producto_id, stock) VALUES (1, 30);
 INSERT INTO inventario (producto_id, stock) VALUES (2, 1);
 INSERT INTO inventario (producto_id, stock) VALUES (3, 5);
 
 -- Clientes: 10 = VIP, 20 = FRECUENTE, 30 = MOROSO con deuda (id 40 no existe, para probar "cliente no registrado")
-INSERT INTO clientes (id, nombre, tipo_cliente) VALUES (10, 'Cliente VIP', 'VIP');
+INSERT INTO clientes (id, nombre, tipo_cliente, nit) VALUES (10, 'Cliente VIP', 'VIP', '900123456-7');
 INSERT INTO clientes (id, nombre, tipo_cliente) VALUES (20, 'Cliente Frecuente', 'FRECUENTE');
 INSERT INTO clientes (id, nombre, tipo_cliente) VALUES (30, 'Cliente Moroso', 'MOROSO');
 
